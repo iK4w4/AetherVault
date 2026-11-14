@@ -25,6 +25,11 @@ pub struct ThrottleState {
     /// Unix time the lockout ends; 0 = not locked out.
     #[serde(default)]
     pub locked_until_unix: i64,
+    /// How many lockouts have engaged since the last successful
+    /// unlock. Persists across expired lockouts so the NEXT one is
+    /// longer (escalating backoff); only `reset()` clears it.
+    #[serde(default)]
+    pub lockout_count: u32,
 }
 
 impl ThrottleState {
@@ -76,13 +81,31 @@ impl ThrottleStore {
     /// for a write. A crafted sidecar deadline is clamped to one
     /// lockout length — a `locked_until_unix` of `i64::MAX` must
     /// not lock the owner out forever.
+    /// Lockout length for cycle `count` (1-based): the base length
+    /// multiplied by 1, 4, 20, then 120 for the fourth and beyond
+    /// (production base 30 s → 30 s, 2 min, 10 min, 1 h).
+    fn lockout_duration(&self, count: u32) -> u64 {
+        const FACTORS: [u64; 4] = [1, 4, 20, 120];
+        let idx = (count.saturating_sub(1).min(3)) as usize;
+        self.lockout_secs.saturating_mul(FACTORS[idx])
+    }
+
     pub fn effective(&self, now_unix: i64) -> ThrottleState {
         let state = self.load();
         if state.locked_until_unix != 0 && state.locked_until_unix <= now_unix {
-            ThrottleState::default()
-        } else if state.locked_until_unix > now_unix.saturating_add(self.lockout_secs as i64) {
+            // Expired: fresh failure count, but the escalation
+            // level survives — otherwise every lockout would be
+            // the short first one again.
             ThrottleState {
-                locked_until_unix: now_unix.saturating_add(self.lockout_secs as i64),
+                lockout_count: state.lockout_count,
+                ..ThrottleState::default()
+            }
+        } else if state.locked_until_unix
+            > now_unix.saturating_add(self.lockout_duration(state.lockout_count.max(1)) as i64)
+        {
+            ThrottleState {
+                locked_until_unix: now_unix
+                    .saturating_add(self.lockout_duration(state.lockout_count.max(1)) as i64),
                 ..state
             }
         } else {
@@ -129,7 +152,9 @@ impl ThrottleStore {
         }
         state.failed_attempts = state.failed_attempts.saturating_add(1);
         if state.failed_attempts >= MAX_FAILED_UNLOCKS {
-            state.locked_until_unix = now_unix + self.lockout_secs as i64;
+            state.lockout_count = state.lockout_count.saturating_add(1);
+            state.locked_until_unix =
+                now_unix + self.lockout_duration(state.lockout_count) as i64;
         }
         self.save(&state);
     }

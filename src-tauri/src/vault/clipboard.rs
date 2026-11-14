@@ -318,7 +318,16 @@ pub fn clear_tracked_secret() {
     })();
     if outcome.is_some() {
         if let Ok(mut last) = LAST_SECRET.lock() {
-            last.take();
+            // Compare-and-take: a newer secret copied while this
+            // sweep was doing clipboard I/O must stay tracked, or
+            // it would never be swept on lock/exit.
+            let still_same = last
+                .as_ref()
+                .map(|cur| clipboard_eq(cur.as_bytes(), tracked.as_bytes()))
+                .unwrap_or(false);
+            if still_same {
+                last.take();
+            }
         }
     }
     // `tracked` (a Zeroizing<String>) wipes on drop when taken; when

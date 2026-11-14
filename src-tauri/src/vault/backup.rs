@@ -64,12 +64,24 @@ pub fn iso8601_utc(unix_secs: i64) -> String {
 /// Encrypt the plaintext payload JSON under the backup password.
 /// Returns the backup document as a JSON string.
 pub fn export_backup(payload_json: &str, password: &str) -> Result<String> {
-    // A 1-character backup password is offline-brute-forceable in
-    // about a minute at Argon2id speed — same 8-character floor
-    // as the master password.
+    // Same gate as the master password: 8-character floor, no
+    // breached passwords, minimum strength score. The backup file
+    // is self-contained and attacked offline at Argon2id speed, so
+    // a common password the vault would reject must not protect it.
     if password.chars().count() < 8 {
         return Err(VaultError::Validation(
             "Backup password must be at least 8 characters.".into(),
+        ));
+    }
+    let eval = crate::crypto::evaluate_strength(password);
+    if eval.breached {
+        return Err(VaultError::Validation(
+            "That backup password is in a list of commonly breached passwords — pick a different one.".into(),
+        ));
+    }
+    if eval.score < 2 {
+        return Err(VaultError::Validation(
+            "That backup password is too weak — use a longer password with mixed letters, numbers, and symbols.".into(),
         ));
     }
     let salt = crypto::random_bytes::<{ crypto::SALT_LEN }>();

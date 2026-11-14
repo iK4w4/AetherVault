@@ -1,4 +1,4 @@
-//! AetherVault 1.0.6 — Tauri backend (Rust vault engine, WebView2 UI).
+//! AetherVault 1.0.7 — Tauri backend (Rust vault engine, WebView2 UI).
 //!
 //! The vault engine lives in `vault` (envelope, key slots, session,
 //! TOTP, generator, audit, backup, clipboard, persisted throttle)

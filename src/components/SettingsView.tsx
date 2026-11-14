@@ -141,8 +141,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const handleExportEncryptedBackup = async (e: React.FormEvent) => {
     e.preventDefault();
     setBackupExportError('');
-    if (backupExportPw.length < 6) {
-      setBackupExportError('Choose a backup password of at least 6 characters.');
+    if (backupExportPw.length < 8) {
+      setBackupExportError('Choose a backup password of at least 8 characters.');
       return;
     }
     setBackupExportBusy(true);

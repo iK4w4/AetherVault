@@ -1,6 +1,6 @@
 [package]
 name = "aethervault"
-version = "1.0.6"
+version = "1.0.7"
 description = "AetherVault — local-first password manager. Rust vault engine, WebView2 UI."
 authors = ["@iK4w4"]
 edition = "2021"

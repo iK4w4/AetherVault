@@ -21,8 +21,9 @@ pub fn seconds_remaining_in(now_unix: u64, period: u64) -> u64 {
 }
 
 /// Clamp helpers shared by the `totp_code` command: period
-/// outside 5–300 s falls back to 30 s; digits are 8 or
-/// (anything else) 6.
+/// outside 5–300 s falls back to 30 s; digit counts 6, 7 and 8
+/// are honored as-is (some banks/enterprise issuers use 7);
+/// anything else falls back to 6.
 pub fn clamp_period(period: u32) -> u64 {
     if (5..=300).contains(&period) {
         period as u64
@@ -32,8 +33,8 @@ pub fn clamp_period(period: u32) -> u64 {
 }
 
 pub fn clamp_digits(digits: u32) -> usize {
-    if digits == 8 {
-        8
+    if (6..=8).contains(&digits) {
+        digits as usize
     } else {
         6
     }

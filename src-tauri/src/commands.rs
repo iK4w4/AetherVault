@@ -240,6 +240,12 @@ pub fn generate_password(opts: GeneratePasswordOpts) -> Result<serde_json::Value
 pub fn generate_passphrase(word_count: u32) -> Result<serde_json::Value, String> {
     let opts = generator::PassphraseOptions {
         words: word_count as usize,
+        // The frontend re-styles the words (separator / capitalize /
+        // its own optional number), splitting on non-letters — a
+        // backend-appended digit would be silently dropped there
+        // and the reported entropy would not match what the user
+        // actually gets. The frontend owns the number suffix.
+        append_digit: false,
         ..Default::default()
     };
     let passphrase = generator::generate_passphrase(&opts).map_err(|e| e.to_string())?;

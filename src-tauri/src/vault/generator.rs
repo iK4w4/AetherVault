@@ -242,6 +242,15 @@ pub fn try_normalize_recovery_key(input: &str) -> Result<String> {
         .filter(|c| c.is_ascii_alphanumeric())
         .collect::<String>()
         .to_uppercase();
+    // A 24-char input starting with AEV is a TRUNCATED full key
+    // (the first 24 chars of AEV + 24), not a bare body — treating
+    // it as a body would silently regroup it into a different key
+    // and report a misleading "wrong key" at unlock.
+    if clean.len() == 24 && clean.starts_with("AEV") {
+        return Err(VaultError::Validation(
+            "That recovery key looks incomplete — the full key is AEV plus 24 characters. Check for a truncated copy.".into(),
+        ));
+    }
     let body = match clean.len() {
         24 => clean.as_str(),
         27 if clean.starts_with("AEV") => &clean[3..],

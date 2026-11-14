@@ -49,7 +49,20 @@ export async function createNewVault(
   const { recovery_key } = await invokeCmd<{ recovery_key: string }>('create_vault', {
     password: masterPassword,
   });
-  await invokeCmd('save_vault', { payload: initialPayload });
+  try {
+    await invokeCmd('save_vault', { payload: initialPayload });
+  } catch (err) {
+    // Creation is two steps on the backend: if the initial payload
+    // never lands, the vault on disk is the empty default — and its
+    // recovery key was never shown. Erase it so the user can retry
+    // instead of being stranded with an unusable vault.
+    try {
+      await invokeCmd('erase_vault');
+    } catch {
+      // Best effort only; the original error is the one to surface.
+    }
+    throw err;
+  }
   return { recoveryKey: recovery_key };
 }
 
