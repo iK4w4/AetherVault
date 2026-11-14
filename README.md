@@ -103,6 +103,9 @@ npm run tauri build    # production build -> src-tauri/target/release/aethervaul
   Keys never leave Rust memory. Only run builds from this
   repository.
 
+See [SECURITY.md](SECURITY.md) for how to report a vulnerability
+and how to verify a release download.
+
 ## Feedback
 
 Open an issue here, or reach me on Telegram: [@AskKawaBot](https://t.me/AskKawaBot).

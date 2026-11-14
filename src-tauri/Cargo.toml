@@ -2,7 +2,9 @@
 name = "aethervault"
 version = "1.0.7"
 description = "AetherVault — local-first password manager. Rust vault engine, WebView2 UI."
-authors = ["@iK4w4"]
+authors = ["iK4w4"]
+license = "MIT"
+repository = "https://github.com/iK4w4/AetherVault"
 edition = "2021"
 
 [lib]
