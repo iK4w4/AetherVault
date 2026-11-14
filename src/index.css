@@ -1,0 +1,367 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/PlusJakartaSans-var.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/JetBrainsMono-var.woff2') format('woff2');
+}
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --neu-bg: #e5e9f0;
+  --neu-surface: #e5e9f0;
+  --neu-surface-alt: #edf0f5;
+  --neu-text: #1b2230;
+  --neu-text-muted: #5a6578;
+  --neu-text-subtle: #7c879a;
+  --neu-accent: #4b67e6;
+  --neu-accent-hover: #3e59d6;
+  --neu-accent-soft: rgba(75, 103, 230, 0.14);
+  --neu-danger: #d43d48;
+  --neu-warning: #c47614;
+  --neu-success: #168652;
+  --neu-divider: rgba(154, 168, 190, 0.34);
+
+  --neu-shadow-raised: 7px 7px 16px #c3c9d4, -7px -7px 16px #ffffff;
+  --neu-shadow-raised-sm: 4px 4px 9px #c4cad5, -4px -4px 9px #ffffff;
+  --neu-shadow-raised-xs: 2px 2px 5px #c5cbd6, -2px -2px 5px #ffffff;
+  --neu-shadow-inset: inset 4px 4px 8px #c3c9d4, inset -4px -4px 8px #ffffff;
+  --neu-shadow-inset-sm: inset 2px 2px 5px #c4cad5, inset -2px -2px 5px #ffffff;
+  --neu-shadow-btn-primary: 5px 5px 11px #c1c7d2, -5px -5px 11px #ffffff, inset 1px 1px 2px rgba(255, 255, 255, 0.35);
+  --neu-shadow-btn-primary-active: inset 3px 3px 7px #3348b0, inset -2px -2px 5px #647ef5;
+}
+
+.dark {
+  --neu-bg: #222630;
+  --neu-surface: #222630;
+  --neu-surface-alt: #272c37;
+  --neu-text: #e8ecf5;
+  --neu-text-muted: #9ea8b8;
+  --neu-text-subtle: #747e90;
+  --neu-accent: #6c87ff;
+  --neu-accent-hover: #7f97ff;
+  --neu-accent-soft: rgba(108, 135, 255, 0.16);
+  --neu-danger: #f06670;
+  --neu-warning: #eab04e;
+  --neu-success: #39bd80;
+  --neu-divider: rgba(255, 255, 255, 0.065);
+
+  --neu-shadow-raised: 7px 7px 16px #171a22, -7px -7px 16px #2d3240;
+  --neu-shadow-raised-sm: 4px 4px 9px #171a22, -4px -4px 9px #2d3240;
+  --neu-shadow-raised-xs: 2px 2px 5px #171a22, -2px -2px 5px #2d3240;
+  --neu-shadow-inset: inset 4px 4px 8px #171a22, inset -4px -4px 8px #2d3240;
+  --neu-shadow-inset-sm: inset 2px 2px 5px #171a22, inset -2px -2px 5px #2d3240;
+  --neu-shadow-btn-primary: 5px 5px 11px #161920, -5px -5px 11px #2f3543, inset 1px 1px 2px rgba(255, 255, 255, 0.22);
+  --neu-shadow-btn-primary-active: inset 3px 3px 7px #475ec7, inset -2px -2px 5px #8aa0ff;
+}
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+    background-color: var(--neu-bg);
+    color: var(--neu-text);
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 180ms ease, color 180ms ease;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--neu-accent);
+    outline-offset: 2px;
+  }
+
+  .font-mono {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Tactile Neumorphic Surfaces */
+.neu-raised {
+  background-color: var(--neu-surface);
+  box-shadow: var(--neu-shadow-raised);
+}
+
+.neu-raised-sm {
+  background-color: var(--neu-surface);
+  box-shadow: var(--neu-shadow-raised-sm);
+}
+
+.neu-raised-xs {
+  background-color: var(--neu-surface);
+  box-shadow: var(--neu-shadow-raised-xs);
+}
+
+.neu-inset {
+  background-color: var(--neu-surface);
+  box-shadow: var(--neu-shadow-inset);
+}
+
+.neu-inset-sm {
+  background-color: var(--neu-surface);
+  box-shadow: var(--neu-shadow-inset-sm);
+}
+
+.neu-btn {
+  background-color: var(--neu-surface);
+  box-shadow: var(--neu-shadow-raised-sm);
+  color: var(--neu-text);
+  transition: box-shadow 150ms cubic-bezier(0.16, 1, 0.3, 1), transform 150ms cubic-bezier(0.16, 1, 0.3, 1), color 150ms ease, opacity 150ms ease;
+}
+
+.neu-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.neu-btn:active:not(:disabled),
+.neu-btn-pressed {
+  box-shadow: var(--neu-shadow-inset-sm);
+  transform: translateY(0);
+}
+
+.neu-btn:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.neu-btn-primary {
+  background-color: var(--neu-accent);
+  color: #ffffff;
+  box-shadow: var(--neu-shadow-btn-primary);
+  transition: background-color 150ms ease, box-shadow 150ms cubic-bezier(0.16, 1, 0.3, 1), transform 150ms cubic-bezier(0.16, 1, 0.3, 1), opacity 150ms ease;
+}
+
+.neu-btn-primary:hover:not(:disabled) {
+  background-color: var(--neu-accent-hover);
+  transform: translateY(-1px);
+}
+
+.neu-btn-primary:active:not(:disabled) {
+  box-shadow: var(--neu-shadow-btn-primary-active);
+  transform: translateY(0);
+}
+
+.neu-btn-primary:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.neu-input {
+  background-color: var(--neu-surface);
+  box-shadow: var(--neu-shadow-inset);
+  color: var(--neu-text);
+  border: none;
+  outline: none;
+  transition: box-shadow 150ms ease;
+}
+
+.neu-input::placeholder {
+  color: var(--neu-text-subtle);
+}
+
+.neu-input:focus {
+  box-shadow: var(--neu-shadow-inset), 0 0 0 2px var(--neu-accent-soft);
+}
+
+.neu-input-error {
+  box-shadow: var(--neu-shadow-inset), 0 0 0 2px rgba(212, 61, 72, 0.48);
+}
+
+/* Themed text selection. */
+::selection {
+  background-color: var(--neu-accent-soft);
+  color: var(--neu-text);
+}
+
+/* Custom tooltips — replaces the browser's native title= boxes.
+   Usage: data-tip="Label" on any button; data-tip-pos="below" when the
+   button sits at the very top of the window (title bar). */
+[data-tip] {
+  position: relative;
+}
+
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 9px);
+  left: 50%;
+  transform: translateX(-50%) translateY(3px);
+  background-color: var(--neu-text);
+  color: var(--neu-bg);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  padding: 7px 10px;
+  border-radius: 9px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 120;
+  box-shadow: 0 4px 14px rgba(15, 20, 35, 0.28);
+  transition: opacity 120ms ease 350ms, transform 120ms ease 350ms;
+}
+
+[data-tip]::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 8px;
+  height: 8px;
+  background-color: var(--neu-text);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 120;
+  transition: opacity 120ms ease 350ms;
+}
+
+[data-tip]:hover::after,
+[data-tip]:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+[data-tip]:hover::before,
+[data-tip]:focus-visible::before {
+  opacity: 1;
+}
+
+[data-tip-pos='below']::after {
+  bottom: auto;
+  top: calc(100% + 9px);
+  transform: translateX(-50%) translateY(-3px);
+}
+
+[data-tip-pos='below']::before {
+  bottom: auto;
+  top: calc(100% + 4px);
+}
+
+[data-tip-pos='below']:hover::after,
+[data-tip-pos='below']:focus-visible::after {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Top fade for scroll views — content fades out at the top edge instead
+   of being sliced mid-glyph by an invisible header. Apply to the
+   scroll container itself. */
+.neu-scroll-fade {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 26px);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 26px);
+}
+
+/* Tactile Neumorphic Range Slider */
+input[type="range"].neu-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 10px;
+  border-radius: 999px;
+  background-color: var(--neu-surface);
+  background-image: linear-gradient(
+    to right,
+    var(--neu-accent) 0 var(--fill, 50%),
+    transparent var(--fill, 50%) 100%
+  );
+  box-shadow: var(--neu-shadow-inset-sm);
+  outline: none;
+}
+
+input[type="range"].neu-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: var(--neu-surface);
+  border: 2.5px solid var(--neu-accent);
+  box-shadow: var(--neu-shadow-raised-xs);
+  cursor: pointer;
+  transition: transform 140ms ease;
+}
+
+input[type="range"].neu-range::-webkit-slider-thumb:hover {
+  transform: scale(1.12);
+}
+
+input[type="range"].neu-range::-webkit-slider-thumb:active {
+  transform: scale(1.02);
+}
+
+input[type="range"].neu-range::-moz-range-track {
+  height: 10px;
+  border-radius: 999px;
+  background-color: var(--neu-surface);
+  box-shadow: var(--neu-shadow-inset-sm);
+}
+
+input[type="range"].neu-range::-moz-range-progress {
+  height: 10px;
+  border-radius: 999px;
+  background-color: var(--neu-accent);
+}
+
+input[type="range"].neu-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2.5px solid var(--neu-accent);
+  background-color: var(--neu-surface);
+  box-shadow: var(--neu-shadow-raised-xs);
+  cursor: pointer;
+}
+
+/* Wrong password shake */
+@keyframes neu-shake {
+  0%, 100% { transform: translateX(0); }
+  18% { transform: translateX(-9px); }
+  36% { transform: translateX(8px); }
+  54% { transform: translateX(-6px); }
+  72% { transform: translateX(4px); }
+  90% { transform: translateX(-2px); }
+}
+
+.animate-neu-shake {
+  animation: neu-shake 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* Custom subtle scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(130, 145, 168, 0.35);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(130, 145, 168, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

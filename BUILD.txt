@@ -1,0 +1,56 @@
+How to build AetherVault
+=========================
+
+Prerequisites
+-------------
+- Node.js 20+ and npm
+- Rust (stable, via rustup)
+- Windows: the MSVC build tools (or Visual Studio with the
+  "Desktop development with C++" workload)
+- Linux cross-build to Windows: cargo-xwin plus an LLVM
+  toolchain providing clang, clang-cl, and llvm-rc
+  (llvm-mingw works). See the notes below.
+
+Build (Windows)
+---------------
+  cd AetherVault
+  npm install
+  npm run tauri dev      # development mode
+  npm run tauri build    # production build
+
+Output: src-tauri/target/release/aethervault.exe
+        (rename to AetherVault.exe) — PE32+ GUI x86-64,
+        portable, ~4.8 MB, no installer.
+
+Build (Linux, cross-compiling for Windows)
+-------------------------------------------
+  npm install
+  npm run tauri build -- --runner cargo-xwin \
+      --target x86_64-pc-windows-msvc
+
+  Run with: PATH including ~/.cargo/bin and the llvm-mingw
+  bin/ directory; XWIN_ACCEPT_LICENSE=1; CARGO_TARGET_DIR
+  set to $PWD/src-tauri/target. Do not set RUSTFLAGS
+  -C target-feature=+crt-static — it breaks CRT linking
+  for Tauri. The exe links the dynamic CRT but needs no
+  VC redist: it imports only system DLLs.
+
+  Do not build in /tmp on machines where /tmp is a small
+  tmpfs — the Tauri Windows build needs several GB of
+  scratch space. Build inside the project directory.
+
+Tests
+-----
+  Frontend type check:  npx tsc --noEmit
+  Frontend build:       npm run build
+  Vault logic (Rust):   cargo test in src-tauri (needs
+  Linux GTK libraries for the Tauri shell; the pure vault
+  modules can be tested standalone in a harness crate).
+
+Notes
+-----
+- Bundling is OFF in src-tauri/tauri.conf.json
+  (bundle.active=false): the release is the raw portable
+  exe by design — no installer.
+- The vault file (vault.dat) is created next to the exe
+  on first run and is never included in the build output.

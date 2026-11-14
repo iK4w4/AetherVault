@@ -1,0 +1,36 @@
+[package]
+name = "aethervault"
+version = "1.0.6"
+description = "AetherVault — local-first password manager. Rust vault engine, WebView2 UI."
+authors = ["@iK4w4"]
+edition = "2021"
+
+[lib]
+name = "aethervault_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-png"] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+argon2 = "0.5.3"
+chacha20poly1305 = "0.10.1"
+rand = "0.8.5"
+zeroize = { version = "1.8.1", features = ["derive"] }
+secrecy = "0.10.3"
+sha2 = "0.10.8"
+subtle = "2.6.1"
+totp-rs = { version = "5.7.0", features = ["otpauth"] }
+base64 = "0.22.1"
+arboard = { version = "3.4.1", default-features = false }
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
+opt-level = 3

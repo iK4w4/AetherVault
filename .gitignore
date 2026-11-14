@@ -1,0 +1,20 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+
+# Rust / Tauri build output
+src-tauri/target/
+src-tauri/gen/
+
+# AetherVault user data — NEVER commit a real vault
+vault.dat
+vault.dat.*
+*.exe
+
+# Archives
+*.7z
+*.zip

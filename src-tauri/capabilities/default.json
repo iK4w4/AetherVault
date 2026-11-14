@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schema.tauri.app/config/2/capabilities",
+  "description": "Default capability: core window/app + opener for external links.",
+  "identifier": "default",
+  "permissions": [
+    "core:default",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-close",
+    "core:window:allow-start-dragging",
+    "opener:allow-open-url",
+    "opener:allow-default-urls"
+  ],
+  "windows": [
+    "main"
+  ]
+}
