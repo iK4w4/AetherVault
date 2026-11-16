@@ -1,10 +1,6 @@
 {
   "name": "aethervault",
-  "version": "1.0.7",
-  "private": true,
-  "description": "Local-first offline password manager for Windows — Rust vault (Argon2id + XChaCha20-Poly1305), TOTP, health audit, one portable exe.",
-  "license": "MIT",
-  "author": "iK4w4",
+  "version": "1.0.8",
   "type": "module",
   "scripts": {
     "dev": "vite --port=1420 --strictPort",
