@@ -427,8 +427,9 @@ mod tests {
         assert_eq!(breached.score, 0);
         assert!(breached.bits <= 22.0);
 
-        // 8 chars, no pattern, 41 bits -> Fair.
-        assert_eq!(evaluate_strength("hello123").score, 2);
+        // 8 chars, no pattern, 41 bits -> Fair. (Not "hello123":
+        // "hello" is in the common list, so that one is breached.)
+        assert_eq!(evaluate_strength("zelda123").score, 2);
         // Sequence discounts bits below the Fair floor -> Weak.
         assert_eq!(evaluate_strength("abcdefgh").score, 1);
         // 77 bits -> Strong.
