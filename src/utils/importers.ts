@@ -63,7 +63,16 @@ function normalizeTotpImport(raw?: string): string {
   return raw.trim();
 }
 
+const MAX_IMPORT_BYTES = 10 * 1024 * 1024;
+
+function checkImportSize(rawText: string): void {
+  if (new TextEncoder().encode(rawText).length > MAX_IMPORT_BYTES) {
+    throw new Error('Import file is too large (10 MB limit).');
+  }
+}
+
 export function importBitwardenData(rawText: string): VaultEntry[] {
+  checkImportSize(rawText);
   const trimmed = rawText.trim();
   if (!trimmed) {
     throw new Error('The Bitwarden export is empty.');
@@ -279,6 +288,7 @@ export function importBitwardenData(rawText: string): VaultEntry[] {
 }
 
 export function import1PasswordData(rawText: string): VaultEntry[] {
+  checkImportSize(rawText);
   const trimmed = rawText.trim();
   if (!trimmed) {
     throw new Error('The 1Password export is empty.');

@@ -13,6 +13,8 @@ src-tauri/gen/
 # AetherVault user data — NEVER commit a real vault
 vault.dat
 vault.dat.*
+vault.throttle.json
+*.aevbackup
 *.exe
 
 # Archives

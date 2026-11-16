@@ -54,7 +54,7 @@ and run it. One file, no installer, no admin rights.
 | **TOTP codes** | Authenticator codes (6, 7, or 8 digits), computed in Rust |
 | **Generator** | Random passwords and passphrases, made fully offline |
 | **Health audit** | Finds weak, reused, and duplicate passwords across the vault |
-| **Clipboard** | Copied secrets clear themselves after a delay you set |
+| **Clipboard** | Copied entry secrets clear themselves after a delay you set. The master password and recovery key are copied as persistent copies instead (no auto-clear, kept out of cloud sync) so you can paste them where you need them — clear them from Windows clipboard history (Win+V) when done |
 | **Imports** | Bitwarden, 1Password, and generic CSV |
 | **Backups** | Encrypted backup export and import (`.aevbackup`), plus a recovery key |
 | **System tray** | Hide to tray, lock, and quit from the tray menu |

@@ -22,6 +22,16 @@ Download `AetherVault.exe` only from this repository's
 [releases](https://github.com/iK4w4/AetherVault/releases). Check
 the file against the fingerprint below before running it.
 
+Release 1.0.9:
+
+- Size: 5,219,840 bytes
+- SHA-256: `461f077fd7001d0b12416a3e9459bfc85793d0b50216ee86d81e7aea55df711c`
+
+Release 1.0.8:
+
+- Size: 5,219,328 bytes
+- SHA-256: `8d4e1aaf3b8c62a7cdfc344860b692680a082df307d43886366d96133a68a941`
+
 Release 1.0.7:
 
 - Size: 5,204,992 bytes

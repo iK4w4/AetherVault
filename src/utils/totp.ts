@@ -27,7 +27,8 @@ export function parseTotpInput(input: string): ParsedTotpUri {
       const secret = url.searchParams.get('secret') || '';
       const rawPeriod = Math.floor(Number(url.searchParams.get('period')) || 30);
       const period = rawPeriod >= 5 && rawPeriod <= 300 ? rawPeriod : 30;
-      const digits = Number(url.searchParams.get('digits')) === 8 ? 8 : 6;
+      const rawDigits = Number(url.searchParams.get('digits'));
+      const digits = rawDigits >= 6 && rawDigits <= 8 ? rawDigits : 6;
       const algorithm = normalizeAlgorithm(url.searchParams.get('algorithm'));
       return {
         secret: cleanTotpSecret(secret),

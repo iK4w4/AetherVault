@@ -358,9 +358,15 @@ fn has_repeat_run(s: &str, n: usize) -> bool {
 }
 
 const COMMON_PASSWORDS: &[&str] = &[
-    "password", "123456", "qwerty", "letmein", "admin", "welcome", "monkey", "dragon", "football",
-    "iloveyou", "master", "sunshine", "ashley", "michael", "ninja", "mustang", "charlie", "shadow",
-    "superman", "trustno1",
+    "123456", "123456789", "12345678", "12345", "1234567", "1234567890", "password", "password1", "password123",
+    "qwerty", "qwerty123", "abc123", "111111", "123123", "admin", "letmein", "welcome", "monkey",
+    "dragon", "baseball", "football", "iloveyou", "trustno1", "sunshine", "princess", "master", "hello",
+    "freedom", "whatever", "qazwsx", "1q2w3e4r", "1qaz2wsx", "zaq12wsx", "passw0rd", "p@ssword", "p@ssw0rd",
+    "charlie", "michael", "shadow", "ashley", "bailey", "superman", "batman", "hunter2", "correcthorsebatterystaple",
+    "summer", "winter", "spring", "autumn", "welcome123", "changeme", "secret", "test1234", "root",
+    "toor", "default", "qwertyuiop", "asdfghjkl", "654321", "000000", "987654321", "chocolate", "cookie",
+    "starwars", "pokemon", "minecraft", "roblox", "liverpool", "arsenal", "admin123", "pass1234", "qwerty1",
+    "jordan", "harley", "ranger", "buster",
 ];
 
 #[cfg(test)]

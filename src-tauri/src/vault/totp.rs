@@ -315,7 +315,7 @@ mod tests {
         .is_err());
         // Caller params are clamped (see clamp_period /
         // clamp_digits), never rejected: out-of-range period falls
-        // back to 30, digits other than 8 fall back to 6, and
+        // back to 30, digits outside 6-8 fall back to 6, and
         // unknown algorithms fall back to SHA-1. URI params win
         // when present (also clamped).
         let (_, rem) = code_with_params(
@@ -367,7 +367,7 @@ mod tests {
     #[test]
     fn code_with_params_clamps_and_rejects_hotp() {
         // Bare secret: caller params apply; out-of-range period
-        // falls back to 30, digits other than 8 fall back to 6.
+        // falls back to 30, digits outside 6-8 fall back to 6.
         let (code, remaining) =
             code_with_params("JBSWY3DPEHPK3PXP", 30, 6, "SHA-1").expect("code");
         assert_eq!(code.len(), 6);
@@ -401,7 +401,8 @@ mod tests {
         assert_eq!(clamp_period(0), 30);
         assert_eq!(clamp_period(300), 300);
         assert_eq!(clamp_period(301), 30);
-        assert_eq!(clamp_digits(7), 6);
+        assert_eq!(clamp_digits(7), 7);
+        assert_eq!(clamp_digits(9), 6);
     }
 
     #[test]
