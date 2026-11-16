@@ -1,14 +1,16 @@
 # AetherVault
 
-[![YouTube](https://img.shields.io/badge/YouTube-@iK4w4-FF0000?logo=youtube&logoColor=white)](https://www.youtube.com/@iK4w4)
-[![Telegram](https://img.shields.io/badge/Telegram-@iK4w4-26A5E4?logo=telegram&logoColor=white)](https://t.me/iK4w4)
-[![Telegram Bot](https://img.shields.io/badge/Telegram_Bot-@AskKawaBot-26A5E4?logo=telegram&logoColor=white)](https://t.me/AskKawaBot)
-
 A local-first, offline password manager for Windows — one
 `AetherVault.exe`, no installer. A Rust vault engine (Argon2id +
 XChaCha20-Poly1305) under a neumorphic WebView2 interface. No
 account, no cloud, no network, no telemetry. Your vault file
 (`vault.dat`) lives next to the exe and never leaves your machine.
+
+[![Release](https://img.shields.io/badge/release-v1.0.7-007ec6)](https://github.com/iK4w4/AetherVault/releases) ![Platform](https://img.shields.io/badge/platform-Windows_10_%2F_11-333) ![Built with](https://img.shields.io/badge/built_with-Tauri_2_%C2%B7_Rust-007ec6) ![Download size](https://img.shields.io/badge/download_size-~5_MB-brightgreen) ![License](https://img.shields.io/badge/license-MIT-333)
+
+[![YouTube](https://img.shields.io/badge/YouTube-@iK4w4-FF0000?logo=youtube&logoColor=white)](https://www.youtube.com/@iK4w4)
+[![Telegram](https://img.shields.io/badge/Telegram-@iK4w4-26A5E4?logo=telegram&logoColor=white)](https://t.me/iK4w4)
+[![Telegram Bot](https://img.shields.io/badge/Telegram_Bot-@AskKawaBot-26A5E4?logo=telegram&logoColor=white)](https://t.me/AskKawaBot)
 
 by iK4w4
 
