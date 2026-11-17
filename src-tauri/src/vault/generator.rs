@@ -8,12 +8,13 @@
 //!    character) rendered as grouped characters for the
 //!    Emergency Recovery Sheet.
 //!
-//! All randomness comes from `rand::rngs::OsRng`. No `thread_rng`, no
+//! All randomness comes from `rand::rngs::SysRng`. No `thread_rng`, no
 //! seeded PRNG, no modulo bias in word/char selection (rejection
-//! sampling via `gen_range`).
+//! sampling via `random_range`).
 
-use rand::rngs::OsRng;
-use rand::Rng;
+use rand::rand_core::UnwrapErr;
+use rand::rngs::SysRng;
+use rand::RngExt;
 
 use crate::errors::{Result, VaultError};
 
@@ -99,7 +100,7 @@ pub fn generate_random(opts: &RandomOptions) -> Result<String> {
         pool.retain(|c| !UNAMBIGUOUS_DROP.contains(&c));
     }
     let chars: Vec<char> = pool.chars().collect();
-    let mut rng = OsRng;
+    let mut rng = UnwrapErr(SysRng);
     let mut out = String::with_capacity(opts.length);
     // Guarantee at least one character from each enabled class, then
     // fill the rest from the full pool and Fisher–Yates shuffle so the
@@ -121,7 +122,7 @@ pub fn generate_random(opts: &RandomOptions) -> Result<String> {
             .filter(|c| !opts.unambiguous_only || !UNAMBIGUOUS_DROP.contains(c))
             .collect();
         if !filtered.is_empty() {
-            required.push(filtered[rng.gen_range(0..filtered.len())]);
+            required.push(filtered[rng.random_range(0..filtered.len())]);
         }
     }
     // A length shorter than the enabled class count is an
@@ -137,11 +138,11 @@ pub fn generate_random(opts: &RandomOptions) -> Result<String> {
         out.push(*c);
     }
     while out.chars().count() < opts.length {
-        out.push(chars[rng.gen_range(0..chars.len())]);
+        out.push(chars[rng.random_range(0..chars.len())]);
     }
     let mut v: Vec<char> = out.chars().collect();
     for i in (1..v.len()).rev() {
-        let j = rng.gen_range(0..=i);
+        let j = rng.random_range(0..=i);
         v.swap(i, j);
     }
     Ok(v.into_iter().collect())
@@ -174,10 +175,10 @@ pub fn generate_passphrase(opts: &PassphraseOptions) -> Result<String> {
             "Passphrase must have between 1 and 20 words.".into(),
         ));
     }
-    let mut rng = OsRng;
+    let mut rng = UnwrapErr(SysRng);
     let mut parts: Vec<String> = Vec::with_capacity(opts.words);
     for _ in 0..opts.words {
-        let mut w = WORDLIST[rng.gen_range(0..WORDLIST.len())].to_string();
+        let mut w = WORDLIST[rng.random_range(0..WORDLIST.len())].to_string();
         if opts.capitalize {
             let mut cs = w.chars();
             if let Some(first) = cs.next() {
@@ -189,7 +190,7 @@ pub fn generate_passphrase(opts: &PassphraseOptions) -> Result<String> {
     let mut out = parts.join(&opts.separator);
     if opts.append_digit {
         out.push_str(&opts.separator);
-        out.push_str(&rng.gen_range(0..10).to_string());
+        out.push_str(&rng.random_range(0..10).to_string());
     }
     Ok(out)
 }

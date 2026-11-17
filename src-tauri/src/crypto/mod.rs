@@ -21,7 +21,8 @@ use chacha20poly1305::{
     aead::{Aead, KeyInit, Payload},
     XChaCha20Poly1305, XNonce,
 };
-use rand::{rngs::OsRng, RngCore};
+use rand::rand_core::UnwrapErr;
+use rand::{rngs::SysRng, Rng};
 use secrecy::{ExposeSecret, SecretBox};
 use zeroize::Zeroizing;
 
@@ -60,7 +61,7 @@ impl std::fmt::Debug for MasterKey {
 
 pub fn random_bytes<const N: usize>() -> [u8; N] {
     let mut b = [0u8; N];
-    OsRng.fill_bytes(&mut b);
+    UnwrapErr(SysRng).fill_bytes(&mut b);
     b
 }
 

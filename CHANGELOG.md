@@ -4,6 +4,12 @@ All notable changes to AetherVault are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.0.12] - 2026-11-17
+
+- Updated the `rand` crate from 0.8 to 0.10. Randomness for keys,
+  salts, nonces and the password generator now comes from the
+  current release line. No behavior change.
+
 ## [1.0.11] - 2026-11-17
 
 - Removed the dead `breachedCount` field from the health report
@@ -48,6 +54,7 @@ First public release.
 - System tray: hide to tray, lock, quit
 - Imports from Bitwarden, 1Password, and generic CSV
 
+[1.0.12]: https://github.com/iK4w4/AetherVault/compare/1.0.11...1.0.12
 [1.0.11]: https://github.com/iK4w4/AetherVault/releases/tag/1.0.11
 [1.0.10]: https://github.com/iK4w4/AetherVault/releases/tag/1.0.10
 [1.0.9]: https://github.com/iK4w4/AetherVault/releases/tag/1.0.9

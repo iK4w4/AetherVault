@@ -1,4 +1,4 @@
-//! Real Windows system-tray support for AetherVault 1.0.10.
+//! Real Windows system-tray support for AetherVault 1.0.12.
 //!
 //! The tray icon is built once (lazily, on the first "Hide to Tray") and
 //! kept in managed state. Hiding shows the icon and hides the window;
