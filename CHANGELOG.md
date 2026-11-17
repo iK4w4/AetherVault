@@ -4,6 +4,15 @@ All notable changes to AetherVault are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.0.10] - 2026-11-17
+
+- Health audit no longer shows a "Breached" row: the app has no breach
+  database, so the count was always 0 — the row is removed instead of
+  pretending to check
+- Passphrase generator now defaults to 8 words (was 6 in the vault
+  default, 5 in the window), about 64 bits before the added digit
+- CI now runs the Rust tests against the committed lockfile
+
 ## [1.0.9] - 2026-11-16
 
 - Fixed 7-digit TOTP codes: the frontend parser no longer downgrades

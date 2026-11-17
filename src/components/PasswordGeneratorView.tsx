@@ -24,7 +24,7 @@ export const PasswordGeneratorView: React.FC<PasswordGeneratorViewProps> = ({
   const [excludeAmbiguous, setExcludeAmbiguous] = useState(false);
 
   // Passphrase mode
-  const [wordCount, setWordCount] = useState(5);
+  const [wordCount, setWordCount] = useState(8);
   const [separator, setSeparator] = useState('-');
   const [capitalize, setCapitalize] = useState(false);
   const [includeNumber, setIncludeNumber] = useState(true);

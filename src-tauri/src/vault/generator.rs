@@ -158,9 +158,9 @@ pub struct PassphraseOptions {
 impl Default for PassphraseOptions {
     fn default() -> Self {
         Self {
-            // 6 words by default (48 bits from the words
-            // alone, ~51.3 with the digit).
-            words: 6,
+            // 8 words by default (64 bits from the words
+            // alone, ~67.3 with the digit).
+            words: 8,
             separator: "-".to_string(),
             capitalize: false,
             append_digit: true,
@@ -586,7 +586,7 @@ mod tests {
     fn passphrase_shape_and_entropy() {
         let opts = PassphraseOptions::default();
         let pp = generate_passphrase(&opts).expect("gen");
-        assert_eq!(pp.split('-').count(), 7); // 6 words + digit
+        assert_eq!(pp.split('-').count(), 9); // 8 words + digit
         assert!((passphrase_entropy_bits(&opts) - 51.32).abs() < 0.1);
     }
 
