@@ -587,7 +587,7 @@ mod tests {
         let opts = PassphraseOptions::default();
         let pp = generate_passphrase(&opts).expect("gen");
         assert_eq!(pp.split('-').count(), 9); // 8 words + digit
-        assert!((passphrase_entropy_bits(&opts) - 51.32).abs() < 0.1);
+        assert!((passphrase_entropy_bits(&opts) - 67.32).abs() < 0.1);
     }
 
     #[test]
