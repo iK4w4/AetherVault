@@ -15,6 +15,7 @@
   <img src="https://img.shields.io/badge/built_with-Tauri_2_·_Rust-007ec6" alt="Built with">
   <img src="https://img.shields.io/badge/download_size-~5_MB-brightgreen" alt="Download size">
   <img src="https://img.shields.io/badge/license-MIT-333" alt="License">
+  <a href="https://github.com/iK4w4/AetherVault/actions/workflows/ci.yml"><img src="https://github.com/iK4w4/AetherVault/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 </p>
 
 <p align="center">

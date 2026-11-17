@@ -79,7 +79,7 @@ export interface VaultPayload {
   settings: VaultSettings;
 }
 
-export type AuditIssueType = 'breached' | 'weak' | 'reused' | 'old';
+export type AuditIssueType = 'weak' | 'reused' | 'old';
 
 export interface AuditIssue {
   id: string;

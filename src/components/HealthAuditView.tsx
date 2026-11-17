@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  AlertOctagon,
   ArrowRight,
   CheckCircle2,
   Clock,
@@ -86,8 +85,6 @@ export const HealthAuditView: React.FC<HealthAuditViewProps> = ({
 
   const issueIcon = (type: AuditIssueType) => {
     switch (type) {
-      case 'breached':
-        return <AlertOctagon className="w-4 h-4 text-[var(--neu-danger)]" />;
       case 'weak':
         return <ShieldAlert className="w-4 h-4 text-[var(--neu-warning)]" />;
       case 'reused':
@@ -103,7 +100,6 @@ export const HealthAuditView: React.FC<HealthAuditViewProps> = ({
     count: number;
     tone: string;
   }[] = [
-    { id: 'breached', label: 'Breached', count: report.breachedCount, tone: 'var(--neu-danger)' },
     { id: 'weak', label: 'Weak', count: report.weakCount, tone: 'var(--neu-warning)' },
     { id: 'reused', label: 'Reused', count: report.reusedCount, tone: 'var(--neu-warning)' },
     { id: 'old', label: 'Aging (>180d)', count: report.oldCount, tone: 'var(--neu-text-muted)' },
