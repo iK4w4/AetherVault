@@ -4,6 +4,12 @@ All notable changes to AetherVault are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.0.11] - 2026-11-17
+
+- Removed the dead `breachedCount` field from the health report
+  end to end (Rust report, types, app state) — it was always 0
+- Fixed the audit score formula in the module docs to match the code
+
 ## [1.0.10] - 2026-11-17
 
 - Health audit no longer shows a "Breached" row: the app has no breach
@@ -42,6 +48,8 @@ First public release.
 - System tray: hide to tray, lock, quit
 - Imports from Bitwarden, 1Password, and generic CSV
 
+[1.0.11]: https://github.com/iK4w4/AetherVault/releases/tag/1.0.11
+[1.0.10]: https://github.com/iK4w4/AetherVault/releases/tag/1.0.10
 [1.0.9]: https://github.com/iK4w4/AetherVault/releases/tag/1.0.9
 [1.0.8]: https://github.com/iK4w4/AetherVault/releases/tag/1.0.8
 [1.0.7]: https://github.com/iK4w4/AetherVault/releases/tag/1.0.7

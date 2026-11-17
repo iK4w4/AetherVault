@@ -1,5 +1,5 @@
 //! Vault health audit producing the `HealthReport` JSON:
-//! score, totalLogins, breached/weak/reused/old counts, issues,
+//! score, totalLogins, weak/reused/old counts, issues,
 //! and duplicate groups (entry JSON grouped by domain, with
 //! plaintext passwords replaced by `passwordLength`).
 //!
@@ -13,14 +13,13 @@
 //!   than 180 days ago.
 //! * Duplicates: non-trashed logins grouped by normalized domain
 //!   (host, lowercased, `www.` stripped); groups of 2+ only.
-//! * Score: `100 - round((breached*22 + weak*12 + reused*9 +
+//! * Score: `100 - round((weak*12 + reused*9 +
 //!   old*4) / max(totalLogins, 3) * 1.4)`, clamped to [8, 100];
 //!   100 when there are no active logins.
 //! * Issues sorted critical → high → medium, then by entry title.
 //!
-//! NO BREACH CORPUS: `breachedCount` is always 0 and no `breached`
-//! issues are ever produced (there is no local HIBP range file and
-//! no network lookup). A password in the small built-in
+//! NO BREACH CORPUS: no `breached` issues are ever produced
+//! (there is no local HIBP range file and no network lookup). A password in the small built-in
 //! common-password list still scores 0, so it surfaces as a
 //! `weak` issue.
 
@@ -311,7 +310,6 @@ pub fn audit_vault(entries: &[Value]) -> Value {
     json!({
         "score": score,
         "totalLogins": total,
-        "breachedCount": 0,
         "weakCount": weak_count,
         "reusedCount": reused_count,
         "oldCount": old_count,
@@ -351,7 +349,6 @@ mod tests {
         let report = audit_vault(&entries);
         // totalLogins counts only logins WITH a password (a, b, c).
         assert_eq!(report["totalLogins"], 3);
-        assert_eq!(report["breachedCount"], 0);
         // "password" is common → score 0 → weak, twice.
         assert_eq!(report["weakCount"], 2);
         // Same password on a + b → reused, twice.

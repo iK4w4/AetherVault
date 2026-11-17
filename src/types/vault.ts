@@ -101,7 +101,6 @@ export interface DuplicateGroup {
 export interface HealthReport {
   score: number;
   totalLogins: number;
-  breachedCount: number;
   weakCount: number;
   reusedCount: number;
   oldCount: number;

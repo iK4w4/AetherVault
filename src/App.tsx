@@ -38,7 +38,6 @@ import { TitleBar } from './components/TitleBar';
 const EMPTY_HEALTH_REPORT: HealthReport = {
   score: 100,
   totalLogins: 0,
-  breachedCount: 0,
   weakCount: 0,
   reusedCount: 0,
   oldCount: 0,
