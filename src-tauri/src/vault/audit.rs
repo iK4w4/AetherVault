@@ -23,7 +23,7 @@
 //! common-password list still scores 0, so it surfaces as a
 //! `weak` issue.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
@@ -131,6 +131,24 @@ fn is_login(e: &Value) -> bool {
     entry_str(e, "category") == "login"
 }
 
+/// Issue ids must be unique (the frontend keys lists by id),
+/// but entry ids come from the payload and can repeat (imports
+/// do not dedupe them). First use keeps the plain id; repeats
+/// get a numeric suffix.
+fn unique_issue_id(base: String, used: &mut HashSet<String>) -> String {
+    if used.insert(base.clone()) {
+        return base;
+    }
+    let mut n = 2;
+    loop {
+        let cand = format!("{base}-{n}");
+        if used.insert(cand.clone()) {
+            return cand;
+        }
+        n += 1;
+    }
+}
+
 /// Build the `HealthReport` JSON for the given entries.
 pub fn audit_vault(entries: &[Value]) -> Value {
     let now_ms = crate::vault::now_unix() * 1000;
@@ -145,6 +163,7 @@ pub fn audit_vault(entries: &[Value]) -> Value {
         .collect();
 
     let mut issues: Vec<Value> = Vec::new();
+    let mut used_issue_ids: HashSet<String> = HashSet::new();
     let mut weak_count = 0usize;
     let mut old_count = 0usize;
 
@@ -174,7 +193,7 @@ pub fn audit_vault(entries: &[Value]) -> Value {
         if eval.score <= 1 {
             weak_count += 1;
             issues.push(json!({
-                "id": format!("{id}-weak"),
+                "id": unique_issue_id(format!("{id}-weak"), &mut used_issue_ids),
                 "entryId": id,
                 "entryTitle": title,
                 "username": username,
@@ -204,7 +223,7 @@ pub fn audit_vault(entries: &[Value]) -> Value {
             old_count += 1;
             let days = now_ms.saturating_sub(last_changed) / (24 * 60 * 60 * 1000);
             issues.push(json!({
-                "id": format!("{id}-old"),
+                "id": unique_issue_id(format!("{id}-old"), &mut used_issue_ids),
                 "entryId": id,
                 "entryTitle": title,
                 "username": username,
@@ -220,13 +239,19 @@ pub fn audit_vault(entries: &[Value]) -> Value {
     let mut reused_count = 0usize;
     for group in by_hash.values() {
         if group.len() > 1 {
-            for e in group {
+            for (i, e) in group.iter().enumerate() {
                 reused_count += 1;
                 let id = entry_str(e, "id");
+                // "Others" means the OTHER entries — compare by
+                // position, not by id string: two entries can
+                // share an id (imports do not dedupe), and an
+                // id-based filter dropped them all, producing
+                // "Shared with ." descriptions.
                 let others: Vec<String> = group
                     .iter()
-                    .filter(|g| entry_str(g, "id") != id)
-                    .map(|g| entry_str(g, "title"))
+                    .enumerate()
+                    .filter(|(j, _)| *j != i)
+                    .map(|(_, g)| entry_str(g, "title"))
                     .collect();
                 let mut desc = format!("Shared with {}", others[..others.len().min(2)].join(", "));
                 if others.len() > 2 {
@@ -234,7 +259,7 @@ pub fn audit_vault(entries: &[Value]) -> Value {
                 }
                 desc.push('.');
                 issues.push(json!({
-                    "id": format!("{id}-reused"),
+                    "id": unique_issue_id(format!("{id}-reused"), &mut used_issue_ids),
                     "entryId": id,
                     "entryTitle": entry_str(e, "title"),
                     "username": entry_str(e, "username"),
@@ -383,6 +408,35 @@ mod tests {
             .collect();
         assert!(sev.iter().take_while(|s| **s == "high").count() >= 4);
         assert_eq!(sev.last(), Some(&"medium"));
+    }
+
+    #[test]
+    fn audit_duplicate_entry_ids_get_unique_issue_ids_and_real_others() {
+        let now_ms = crate::vault::now_unix() * 1000;
+        // Two entries sharing BOTH an id and a password (imports
+        // do not dedupe ids): the reuse description must name the
+        // other entry, and the two reused issues need distinct ids.
+        let entries = vec![
+            login("dup", "Site A", "SharedPass1!x", "https://a.example.com", now_ms),
+            login("dup", "Site B", "SharedPass1!x", "https://b.example.com", now_ms),
+        ];
+        let report = audit_vault(&entries);
+        assert_eq!(report["reusedCount"], 2);
+        let reused: Vec<&Value> = report["issues"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|i| i["type"] == "reused")
+            .collect();
+        assert_eq!(reused.len(), 2);
+        assert_ne!(reused[0]["id"], reused[1]["id"]);
+        let descs: Vec<&str> = reused
+            .iter()
+            .map(|i| i["description"].as_str().unwrap())
+            .collect();
+        assert!(descs.iter().any(|d| d.contains("Site B")), "descs: {descs:?}");
+        assert!(descs.iter().any(|d| d.contains("Site A")), "descs: {descs:?}");
+        assert!(!descs.iter().any(|d| d.contains("Shared with .")), "descs: {descs:?}");
     }
 
     #[test]

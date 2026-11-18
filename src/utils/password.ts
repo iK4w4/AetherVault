@@ -122,9 +122,12 @@ export function evaluatePasswordStrength(password: string): PasswordStrength {
   if (/[0-9]/.test(password)) charsetSize += 10;
   if (/[^a-zA-Z0-9]/.test(password)) charsetSize += 32;
 
-  const uniqueRatio = new Set(password).size / password.length;
+  // Count code points, not UTF-16 units — the Rust side counts
+  // chars() the same way, and the two must agree on length.
+  const charCount = [...password].length;
+  const uniqueRatio = new Set(password).size / charCount;
   let entropyBits = Math.round(
-    password.length * Math.log2(Math.max(charsetSize, 1)) * (0.65 + 0.35 * uniqueRatio)
+    charCount * Math.log2(Math.max(charsetSize, 1)) * (0.65 + 0.35 * uniqueRatio)
   );
 
   if (
@@ -132,7 +135,10 @@ export function evaluatePasswordStrength(password: string): PasswordStrength {
     /(0123|1234|2345|3456|4567|5678|6789|9876|abcd|qwer|asdf|zxcv)/i.test(password) ||
     /(.)\1{3,}/.test(password)
   ) {
-    entropyBits = Math.max(10, Math.round(entropyBits * 0.52));
+    // The 10-bit floor must never RAISE the estimate above the
+    // raw value: for a 2-char password the "penalty" used to
+    // report more bits than the password actually has.
+    entropyBits = Math.min(entropyBits, Math.max(10, Math.round(entropyBits * 0.52)));
   }
 
   if (isBreached) {
@@ -146,7 +152,7 @@ export function evaluatePasswordStrength(password: string): PasswordStrength {
     };
   }
 
-  if (password.length < 8 || entropyBits < 36) {
+  if (charCount < 8 || entropyBits < 36) {
     return {
       score: 1,
       label: 'Weak',

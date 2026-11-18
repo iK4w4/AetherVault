@@ -4,6 +4,36 @@ All notable changes to AetherVault are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.0.13] - 2026-11-18
+
+- Fixed the double eye icon on password fields: WebView2 draws
+  its own reveal button inside password inputs, and the app's
+  toggle sat next to it. The built-in one is now hidden, so each
+  field shows exactly one eye
+- Fixed Bitwarden CSV imports silently dropping all card and
+  identity fields (number, expiry, CVV, name, email, phone,
+  address, ID number) — cards and identities now import whole
+- Bitwarden JSON items of unsupported types (for example SSH
+  keys) are now skipped instead of becoming empty login entries
+- Fixed the unlock throttle being bypassed when `vault.dat` was
+  corrupt: wrong passwords tried against `vault.dat.bak` were
+  never counted, so the lockout never engaged
+- A second launch of the app now focuses the running window
+  instead of opening a twin instance whose saves could silently
+  overwrite the first instance's entries
+- Changing the master password or rotating the recovery key on
+  a vault whose primary file is corrupt no longer overwrites
+  the good `.bak` with the corrupt bytes
+- The stale-temp sweep no longer deletes temp files that a
+  write in flight is about to rename into place
+- Health audit: entries that share an id (possible after an
+  import) no longer produce colliding issue ids or
+  "Shared with ." descriptions
+- The strength meter no longer reports more bits after its
+  pattern penalty than the password had before it, and password
+  length checks count characters the same way in the UI and the
+  backend (emoji passwords included)
+
 ## [1.0.12] - 2026-11-17
 
 - Updated the `rand` crate from 0.8 to 0.10. Randomness for keys,
@@ -54,6 +84,7 @@ First public release.
 - System tray: hide to tray, lock, quit
 - Imports from Bitwarden, 1Password, and generic CSV
 
+[1.0.13]: https://github.com/iK4w4/AetherVault/compare/1.0.12...1.0.13
 [1.0.12]: https://github.com/iK4w4/AetherVault/compare/1.0.11...1.0.12
 [1.0.11]: https://github.com/iK4w4/AetherVault/releases/tag/1.0.11
 [1.0.10]: https://github.com/iK4w4/AetherVault/releases/tag/1.0.10

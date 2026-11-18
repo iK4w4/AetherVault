@@ -161,7 +161,7 @@ export function importBitwardenData(rawText: string): VaultEntry[] {
           createdAt: now,
           updatedAt: now,
         });
-      } else {
+      } else if (item.type === 1 || item.login) {
         const uris = item.login?.uris;
         const firstUri = Array.isArray(uris) && uris[0] ? uris[0].uri || '' : '';
         const history = Array.isArray(item.passwordHistory)
@@ -241,6 +241,11 @@ export function importBitwardenData(rawText: string): VaultEntry[] {
         updatedAt: now,
       });
     } else if (type === 'card') {
+      // Bitwarden CSV carries the card fields in card_* columns;
+      // mirror the JSON branch's mapping exactly. (These used to
+      // be dropped, importing every card as an empty shell.)
+      const expMonth = r[idx('card_expmonth')] || '';
+      const expYear = r[idx('card_expyear')] || '';
       results.push({
         id: createId(),
         category: 'card',
@@ -249,6 +254,13 @@ export function importBitwardenData(rawText: string): VaultEntry[] {
         tags,
         notes,
         customFields,
+        cardholderName: r[idx('card_cardholdername')] || '',
+        cardNumber: r[idx('card_number')] || '',
+        cardExpiry:
+          expMonth && expYear
+            ? `${expMonth.padStart(2, '0')}/${expYear.slice(-2)}`
+            : '',
+        cardCvv: r[idx('card_code')] || '',
         createdAt: now,
         updatedAt: now,
       });
@@ -261,6 +273,21 @@ export function importBitwardenData(rawText: string): VaultEntry[] {
         tags,
         notes,
         customFields,
+        fullName: [r[idx('identity_firstname')], r[idx('identity_lastname')]]
+          .filter(Boolean)
+          .join(' '),
+        email: r[idx('identity_email')] || '',
+        phone: r[idx('identity_phone')] || '',
+        address: [
+          r[idx('identity_address1')],
+          r[idx('identity_city')],
+          r[idx('identity_state')],
+          r[idx('identity_postalcode')],
+        ]
+          .filter(Boolean)
+          .join(', '),
+        idNumber:
+          r[idx('identity_passportnumber')] || r[idx('identity_ssn')] || '',
         createdAt: now,
         updatedAt: now,
       });

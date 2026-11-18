@@ -175,7 +175,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({
     setSetupConfirmError('');
 
     let hasErr = false;
-    if (setupPassword.length < 8) {
+    if ([...setupPassword].length < 8) {
       setSetupPwError('Master password must be at least 8 characters long.');
       hasErr = true;
     }
@@ -239,7 +239,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({
       setRestoreBackupError('Enter the password used when exporting this backup.');
       hasErr = true;
     }
-    if (restoreNewMasterPw.length < 8) {
+    if ([...restoreNewMasterPw].length < 8) {
       setRestoreNewPwError('Choose a master password of at least 8 characters for this device.');
       hasErr = true;
     }

@@ -300,7 +300,10 @@ pub fn evaluate_strength(password: &str) -> StrengthEval {
     // Repeated runs / sequences / all-same-char discount
     // the effective bits instead of deducting score points.
     if has_repeat_run(password, 3) || has_sequence(password, 4) {
-        bits = (bits * 0.52).max(10.0);
+        // The 10-bit floor must never RAISE the estimate above
+        // the raw value (a 2-char password would otherwise
+        // report more bits after its "penalty" than before).
+        bits = (bits * 0.52).max(10.0).min(bits);
     }
     if breached {
         return StrengthEval {
@@ -437,6 +440,16 @@ mod tests {
         assert_eq!(evaluate_strength("CorrectHorse1").score, 3);
         // 118 bits -> Excellent.
         assert_eq!(evaluate_strength("X9$kQ!2mZp#8vL4n").score, 4);
+    }
+
+    #[test]
+    fn strength_penalty_never_raises_bits() {
+        // "111": raw pool math is 3 * log2(10) ≈ 9.97 bits. The
+        // pattern discount's 10-bit floor must not push the
+        // reported bits ABOVE that raw value.
+        let e = evaluate_strength("111");
+        assert!(e.bits < 10.0, "bits: {}", e.bits);
+        assert_eq!(e.score, 1);
     }
 
     // The breach rule is exact-match (+ the stripped

@@ -16,6 +16,14 @@
 }
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* WebView2 draws its own reveal (eye) button inside password
+   fields; the app renders its own toggle, so hide the built-in
+   one or every password field shows two eyes. */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
 :root {
   --neu-bg: #e5e9f0;
   --neu-surface: #e5e9f0;

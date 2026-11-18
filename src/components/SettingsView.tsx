@@ -109,7 +109,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       setCurrentPwError('Enter your current master password.');
       hasErr = true;
     }
-    if (newPw.length < 8) {
+    if ([...newPw].length < 8) {
       setNewPwError('New master password must be at least 8 characters.');
       hasErr = true;
     }
@@ -141,7 +141,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const handleExportEncryptedBackup = async (e: React.FormEvent) => {
     e.preventDefault();
     setBackupExportError('');
-    if (backupExportPw.length < 8) {
+    if ([...backupExportPw].length < 8) {
       setBackupExportError('Choose a backup password of at least 8 characters.');
       return;
     }

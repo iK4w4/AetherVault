@@ -404,15 +404,26 @@ impl VaultStore {
     /// attempts use `unlock_with_backup` instead, which retries
     /// decrypt failures too.
     fn read_envelope_with_backup(&self) -> Result<Envelope> {
+        Ok(self.read_envelope_with_backup_flagged()?.0)
+    }
+
+    /// Same read, but also reports whether the envelope came
+    /// from `vault.dat.bak` because the primary failed to parse.
+    /// Mutation paths (password / recovery rotation) need this:
+    /// building a new envelope on the backup generation is a
+    /// legitimate repair, but persisting it must NOT rotate the
+    /// corrupt primary over the good `.bak` (that would destroy
+    /// the only other copy and silently roll the vault back).
+    fn read_envelope_with_backup_flagged(&self) -> Result<(Envelope, bool)> {
         match self.read_envelope_from(&self.path) {
-            Ok(env) => Ok(env),
+            Ok(env) => Ok((env, false)),
             Err(VaultError::CorruptVault(primary)) => {
                 let bak = self.backup_path();
                 if !bak.exists() {
                     return Err(VaultError::CorruptVault(primary));
                 }
                 match self.read_envelope_from(&bak) {
-                    Ok(env) => Ok(env),
+                    Ok(env) => Ok((env, true)),
                     Err(_) => Err(VaultError::CorruptVault(primary)),
                 }
             }
@@ -425,9 +436,11 @@ impl VaultStore {
     /// fails to decrypt — retry once against `vault.dat.bak`. Any
     /// other error, including a wrong password, is returned as-is:
     /// a corrupt primary is never allowed to mask, or be masked
-    /// by, a credential failure. If the backup attempt also fails,
-    /// the PRIMARY corruption error is reported (it is the real
-    /// problem).
+    /// by, a credential failure. If the backup attempt reaches a
+    /// credential verdict (`InvalidCredentials`), that verdict is
+    /// passed through so the unlock throttle records it; any
+    /// other backup failure reports the PRIMARY corruption error
+    /// (it is the real problem).
     fn unlock_with_backup(
         &self,
         attempt: impl Fn(&Path) -> Result<Session>,
@@ -441,6 +454,15 @@ impl VaultStore {
                 }
                 match attempt(&bak) {
                     Ok(s) => Ok(s),
+                    // A credential verdict from the backup is a
+                    // real verdict: pass it through so the unlock
+                    // throttle records the failure. Masking it as
+                    // CorruptVault (as before) meant wrong guesses
+                    // against the .bak were never counted and the
+                    // lockout never engaged.
+                    Err(VaultError::InvalidCredentials) => {
+                        Err(VaultError::InvalidCredentials)
+                    }
                     Err(_) => Err(VaultError::CorruptVault(primary)),
                 }
             }
@@ -483,10 +505,25 @@ impl VaultStore {
 
     /// Persist a fully-built envelope: rotate backup, atomic write.
     fn persist_envelope(&self, env: &Envelope) -> Result<()> {
+        self.persist_envelope_inner(env, true)
+    }
+
+    /// Persist WITHOUT rotating the current primary into
+    /// `vault.dat.bak`. Used when the new envelope was built from
+    /// the backup generation because the primary is corrupt:
+    /// rotating would overwrite the good `.bak` with the corrupt
+    /// bytes.
+    fn persist_envelope_keep_backup(&self, env: &Envelope) -> Result<()> {
+        self.persist_envelope_inner(env, false)
+    }
+
+    fn persist_envelope_inner(&self, env: &Envelope, rotate: bool) -> Result<()> {
         if let Some(dir) = self.path.parent() {
             sweep_stale_temps(dir);
         }
-        self.rotate_backup();
+        if rotate {
+            self.rotate_backup();
+        }
         atomic_write(&self.path, &serialize_envelope(env))
     }
 
@@ -721,7 +758,7 @@ impl VaultStore {
             session.master_key.expose(),
             SLOT_PASSWORD_AAD,
         )?;
-        let env = self.read_envelope_with_backup()?;
+        let (env, from_backup) = self.read_envelope_with_backup_flagged()?;
         let new_env = Envelope {
             payload_nonce: env.payload_nonce,
             password_slot: new_slot,
@@ -730,7 +767,14 @@ impl VaultStore {
         };
         // Commit to disk FIRST; only then swap the in-memory slot,
         // so memory and disk never disagree after a failed write.
-        self.persist_envelope(&new_env)?;
+        // When the envelope came from the backup (corrupt primary),
+        // keep the good .bak instead of rotating the corrupt
+        // primary over it.
+        if from_backup {
+            self.persist_envelope_keep_backup(&new_env)?;
+        } else {
+            self.persist_envelope(&new_env)?;
+        }
         session.password_slot = new_env.password_slot;
         session.recovery_slot = new_env.recovery_slot;
         session.unlocked_via_recovery = false;
@@ -748,14 +792,18 @@ impl VaultStore {
             session.master_key.expose(),
             SLOT_RECOVERY_AAD,
         )?;
-        let env = self.read_envelope_with_backup()?;
+        let (env, from_backup) = self.read_envelope_with_backup_flagged()?;
         let new_env = Envelope {
             payload_nonce: env.payload_nonce,
             password_slot: env.password_slot,
             recovery_slot: Some(new_slot),
             ciphertext: env.ciphertext,
         };
-        self.persist_envelope(&new_env)?;
+        if from_backup {
+            self.persist_envelope_keep_backup(&new_env)?;
+        } else {
+            self.persist_envelope(&new_env)?;
+        }
         session.password_slot = new_env.password_slot;
         session.recovery_slot = new_env.recovery_slot;
         Ok(recovery_key)
@@ -783,7 +831,25 @@ pub fn sweep_stale_temps(dir: &Path) {
             continue;
         };
         if s.starts_with(".vault.") && s.ends_with(".tmp") {
-            let _ = std::fs::remove_file(entry.path());
+            // Never sweep a fresh temp: a write in flight right
+            // now (this process's thread pool, or a second
+            // instance) holds one, and deleting it between create
+            // and rename silently loses that write — including
+            // throttle sidecar writes, which swallowed the error
+            // and dropped the recorded failure. Crash leftovers
+            // are old by definition; 60 s is generous.
+            let fresh = entry
+                .metadata()
+                .and_then(|m| m.modified())
+                .map(|t| {
+                    t.elapsed()
+                        .map(|age| age < std::time::Duration::from_secs(60))
+                        .unwrap_or(true)
+                })
+                .unwrap_or(true);
+            if !fresh {
+                let _ = std::fs::remove_file(entry.path());
+            }
         }
     }
 }
@@ -1019,6 +1085,35 @@ mod tests {
         let s = store.unlock_password("correct horse battery staple 9!").expect("fallback unlock");
         let back: Value = serde_json::from_str(&s.last_payload).expect("payload");
         assert_eq!(back["entries"][0]["title"], "First");
+    }
+
+    #[test]
+    fn wrong_password_against_backup_still_counts_for_throttle() {
+        let store = temp_store_with_lockout("bak-throttle", 30);
+        let (mut session, _) = store.create("correct horse battery staple 9!").expect("create");
+        store.save(&mut session, &payload_with_title("First")).expect("save v1");
+        store.save(&mut session, &payload_with_title("Second")).expect("save v2");
+        assert!(store.backup_path().exists());
+        // Parse-level corruption of the primary (magic byte):
+        // every unlock attempt now runs against vault.dat.bak.
+        let mut bytes = std::fs::read(&store.path).expect("read primary");
+        bytes[0] ^= 0xFF;
+        std::fs::write(&store.path, &bytes).expect("corrupt primary");
+        // A wrong guess against the backup is a credential
+        // verdict — it must surface as InvalidCredentials (not be
+        // masked as CorruptVault) and it must be recorded.
+        for _ in 0..5 {
+            let err = store.unlock_password("wrong password here").expect_err("wrong pw");
+            assert!(matches!(err, VaultError::InvalidCredentials), "got: {err}");
+        }
+        let (attempts, locked_until) = store.throttle_status();
+        assert_eq!(attempts, 5);
+        assert!(locked_until > now_unix());
+        // Even the correct password is now refused by the throttle.
+        let err = store
+            .unlock_password("correct horse battery staple 9!")
+            .expect_err("locked out");
+        assert!(err.to_string().contains("try again in"));
     }
 
     #[test]
